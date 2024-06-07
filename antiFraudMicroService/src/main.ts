@@ -6,18 +6,33 @@ import {
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
 
-import { AppModule } from "./infrastructure/controller/app.module";
+import { AppModule } from "./infrastructure/bootstrap/app.module";
+import { GlobalExceptionsFilter } from "./application/exception/GlobalExceptionsFilter";
+import { MicroserviceOptions, Transport } from "@nestjs/microservices";
+import { KAFKA_CONSUMER_ID } from "./application/constants/Constants";
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
+  const brokerKafa = process.env.KAFKA_URL || 'localhost:9092'
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
-    new FastifyAdapter(),
+    {
+      transport: Transport.KAFKA,
+      options: {
+        client: {
+          brokers: [brokerKafa],
+        },
+        consumer: {
+          groupId: KAFKA_CONSUMER_ID,
+        },
+      },
+    }
   );
-  const portServer = process.env.PORT_TRANSACTION_MICROSERVICE || "6000";
+  app.useGlobalFilters(new GlobalExceptionsFilter());
+  const portServer = process.env.PORT_ANTIFRAUD_MICROSERVICE || "7000";
   const configService = app.get(ConfigService);
   const port = configService.get<string>("PORT", portServer);
 
-  await app.listen(port, "0.0.0.0");
+  await app.listen();
 
   const logger = app.get(Logger);
   logger.log(`App is ready and listening on port ${port} 🚀`);

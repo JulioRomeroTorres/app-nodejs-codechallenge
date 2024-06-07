@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ITransactionMySqlRepository } from "../../domain/repository/TransactionMySqlRepository"
-import { CREATE_TRANSACTION, CREATE_TRANSACTION_TABLE, UPDATE_TRANSACTION_STATUS } from "./query/MySql";
-import { DbTransactionInfo } from "@src/domain/interface/DbTransactionInfo";
+import { CREATE_TRANSACTION, CREATE_TRANSACTION_TABLE, GET_INFO_TRANSACTION, UPDATE_TRANSACTION_STATUS } from "./query/MySql";
+import { DbTransactionInfo, TransactionInfo } from "@src/domain/interface/DbTransactionInfo";
 import { CustomException } from "@src/application/exception/Exception";
 import { HTTP_STATUS } from "@src/application/constants/Constants";
 
@@ -79,9 +79,8 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
   }
   async updateStatusTransaction( 
     args: { 
-      statusTransaction: boolean,
-      accountDebitId: string,
-      accountCreditId: string
+      statusTransaction: string,
+      externalId: string
     }
   ): Promise<void>{
     try{
@@ -102,5 +101,18 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
         httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR
       });
     }
+  }
+  async getInfoTransaction(externalInd: string): Promise<TransactionInfo>{
+    this.createPoolConnection();      
+    const currentQuery = this.setParamsQuery({ 
+      query: GET_INFO_TRANSACTION,
+      params: {
+        externalIdValue: externalInd
+      }
+    });
+    const [data, columns] = await this.poolConnection.query(currentQuery);
+    console.log('ResponseDb', data[0]);
+    await this.poolConnection.end(); 
+    return data[0] as TransactionInfo;
   }
 }

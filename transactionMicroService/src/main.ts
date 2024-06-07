@@ -8,12 +8,30 @@ import {
 
 import { AppModule } from "./infrastructure/bootstrap/app.module";
 import { GlobalExceptionsFilter } from "./application/exception/GlobalExceptionsFilter";
+import { Transport } from "@nestjs/microservices";
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
+  app.connectMicroservice(
+    {
+      transport: Transport.KAFKA,
+      options: {
+        suscribe: {
+          fromBeginning: true
+        },
+        consumer: {
+          groupId: process.env.KAFKA_CONSUMER_ID
+        },
+        client: {
+          brokers: [process.env.KAFKA_URL as string]
+        }
+      }
+    });
+  app.startAllMicroservices();
   app.useGlobalFilters(new GlobalExceptionsFilter());
   const portServer = process.env.PORT_TRANSACTION_MICROSERVICE || "6000";
   const configService = app.get(ConfigService);

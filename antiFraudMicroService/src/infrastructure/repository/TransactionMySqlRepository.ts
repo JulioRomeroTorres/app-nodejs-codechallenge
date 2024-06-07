@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { ITransactionMySqlRepository } from "../../domain/repository/TransactionMySqlRepository"
 import { CREATE_TRANSACTION, CREATE_TRANSACTION_TABLE, UPDATE_TRANSACTION_STATUS } from "./query/MySql";
 import { DbTransactionInfo } from "@src/domain/interface/DbTransactionInfo";
+import { CustomException } from "@src/application/exception/Exception";
+import { HTTP_STATUS } from "@src/application/constants/Constants";
 
 const mysql = require('mysql2/promise');
 
@@ -40,7 +42,7 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
   }
   async createTable(): Promise<void>{
     try{
-      if(!this.isCreatedPool) this.createPoolConnection();
+      this.createPoolConnection();
       
       const currentQuery = this.setParamsQuery({ 
         query: CREATE_TRANSACTION_TABLE
@@ -49,13 +51,16 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
       await this.poolConnection.end();
       this.isCreatedTable = true;
     }catch(error){
-      console.log('ErrorCreate', error);
-      throw new Error();
+      console.log('ErrorCreateTable', error);
+      throw new CustomException({
+        message: String(error),
+        httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR
+      });
     }
   }
   async createTransaction( args: DbTransactionInfo ): Promise<void>{
     try{
-      if(!this.isCreatedPool) this.createPoolConnection();
+      this.createPoolConnection();
       //if(!this.isCreatedTable) await this.createTable();
       
       const currentQuery = this.setParamsQuery({ 
@@ -65,8 +70,11 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
       await this.poolConnection.query(currentQuery);
       await this.poolConnection.end();
     }catch(error){
-      console.log('errorcreate', error)
-      throw new Error();
+      console.log('errorCreateTransaction', error);
+      throw new CustomException({
+        message: String(error),
+        httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR
+      });
     }
   }
   async updateStatusTransaction( 
@@ -77,7 +85,7 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
     }
   ): Promise<void>{
     try{
-      if(!this.isCreatedPool) this.createPoolConnection();
+      this.createPoolConnection();
 
       //if(!this.isCreatedTable) await this.createTable();
       
@@ -88,7 +96,11 @@ export class TransactionMySqlRepository implements ITransactionMySqlRepository {
       await this.poolConnection.query(currentQuery);
       await this.poolConnection.end();
     }catch(error){
-      throw new Error();
+      console.log('ErrorUpdateTransaction', error);
+      throw new CustomException({
+        message: String(error),
+        httpStatus: HTTP_STATUS.INTERNAL_SERVER_ERROR
+      });
     }
   }
 }

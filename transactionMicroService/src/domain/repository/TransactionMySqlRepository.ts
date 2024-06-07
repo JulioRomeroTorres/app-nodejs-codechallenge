@@ -1,4 +1,4 @@
-import { DbTransactionInfo } from "../interface/DbTransactionInfo";
+import { DbTransactionInfo, TransactionInfo } from "../interface/DbTransactionInfo";
 
 export interface ITransactionMySqlRepository {
   createTable(): Promise<void>;
@@ -6,9 +6,9 @@ export interface ITransactionMySqlRepository {
   createTransaction( args: DbTransactionInfo ): Promise<void>;
   updateStatusTransaction( 
     args: { 
-      statusTransaction: boolean,
-      accountDebitId: string,
-      accountCreditId: string
+      statusTransaction: string,
+      externalId: string
     }
   ): Promise<void>;
+  getInfoTransaction(externalInd: string): Promise<TransactionInfo>;
 }

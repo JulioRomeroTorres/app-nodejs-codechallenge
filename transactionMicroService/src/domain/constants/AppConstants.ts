@@ -3,3 +3,5 @@ export enum STATUS_TRANSACTION {
   APPROVED = 'approved',
   REJECTED = 'rejected'
 }
+
+export const KAFKA_TOPIC_REPLY = 'yape-challenge-reply'

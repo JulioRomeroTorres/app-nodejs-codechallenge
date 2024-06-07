@@ -1,6 +1,6 @@
 export interface RequestTransactionPayload {
-  accountDebitId: string;
-  accountCreditId: string;
-  statusTransaction: string;
-  transferType: number;  
+  accountExternalDebitId: string;
+  accountExternalCreditId: string;
+  transferTypeId: number;
+  value: number;  
 }
