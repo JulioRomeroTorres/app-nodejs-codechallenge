@@ -1,0 +1,1 @@
+export const VALID_TRANSFER_TYPE_LIST = [ 1, 2, 3 ]
