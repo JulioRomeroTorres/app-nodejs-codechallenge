@@ -4,6 +4,7 @@ import { AntiFraudController } from "./AntiFraudController";
 import { ValidatorService } from "@src/application/service/ValidatorService";
 import { AntiFraudService } from "@src/application/service/AntiFraudService";
 import { ClientKafka, ClientsModule, Transport } from "@nestjs/microservices";
+import { BROKER_KAFKA_URL } from "@src/application/constants/Constants";
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ClientKafka, ClientsModule, Transport } from "@nestjs/microservices";
           transport: Transport.KAFKA,
           options: {
             client: {
-              brokers : [ 'localhost:9092' as string ]
+              brokers : [ BROKER_KAFKA_URL ]
             }
           }
         }

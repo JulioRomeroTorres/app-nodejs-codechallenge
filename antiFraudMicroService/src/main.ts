@@ -9,10 +9,11 @@ import {
 import { AppModule } from "./infrastructure/bootstrap/app.module";
 import { GlobalExceptionsFilter } from "./application/exception/GlobalExceptionsFilter";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
-import { KAFKA_CONSUMER_ID } from "./application/constants/Constants";
+import { BROKER_KAFKA_URL, KAFKA_CONSUMER_ID } from "./application/constants/Constants";
 
 async function bootstrap() {
-  const brokerKafa = process.env.KAFKA_URL || 'localhost:9092'
+  const brokerKafa = BROKER_KAFKA_URL;
+  console.log('URL VARIABLE KAFKA HOST', process.env.KAFKA_URL)
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {

@@ -5,6 +5,7 @@ import { TransactionController } from "./TransactionController";
 import { ValidatorService } from "@src/application/service/ValidatorService";
 import { TransactionService } from "@src/application/service/TransactionService";
 import { ClientKafka, ClientProxy, ClientsModule, Transport } from "@nestjs/microservices";
+import { BROKER_KAFKA_URL } from "@src/application/constants/Constants";
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { ClientKafka, ClientProxy, ClientsModule, Transport } from "@nestjs/micr
           transport: Transport.KAFKA,
           options: {
             client: {
-              brokers : [ 'localhost:9092' as string ]
+              brokers : [ BROKER_KAFKA_URL ]
             }
           }
         }

@@ -11,6 +11,7 @@ services:
       - $MYSQLDB_EXPOSE_PORT:$MYSQLDB_DOCKER_PORT
     volumes:
       - databaseyapechallenge:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - yape_challenge
       
@@ -19,16 +20,17 @@ services:
     restart: unless-stopped
     env_file: ./.env
     environment:
-      - DB_HOST=mysqldb
-      - DB_USER=$MYSQLDB_USER
-      - DB_PASSWORD=$MYSQLDB_PASSWORD
-      - DB_NAME=$MYSQLDB_DATABASE
-      - DB_PORT=$MYSQLDB_DOCKER_PORT
-      - SERVER_PORT=$TRANSACTION_SERVER_PORT
-      - KAFKA_HOST=$KAFKA_SERVER_HOST
-      - KAFKA_PORT=$KAFKA_SERVER_NETWORK_PORT
+      - MYSQL_HOST=mysqldb
+      - MYSQL_USER=$MYSQLDB_USER
+      - MYSQL_PASSWORD=$MYSQLDB_PASSWORD
+      - MYSQL_DATABASE=$MYSQLDB_DATABASE
+      - PORT_TRANSACTION_MICROSERVICE=$PORT_DOCKER_TRANSACTION_MICROSERVICE
+      - KAFKA_TOPIC=$KAFKA_TOPIC
+      - KAFKA_TOPIC_REPLY=$KAFKA_TOPIC_REPLY
+      - KAFKA_CONSUMER_ID=$KAFKA_CONSUMER_ID
+      - KAFKA_URL=kafka:9092
     ports:
-      - ${TRANSACTION_SERVER_PORT}:5000
+      - ${PORT_EXPORT_TRANSACTION_MICROSERVICE}:$PORT_DOCKER_TRANSACTION_MICROSERVICE
     depends_on:
       - mysqldb
       - kafka
@@ -39,9 +41,8 @@ services:
     build: ./antiFraudMicroService
     restart: unless-stopped
     environment:
-      - SERVER_PORT=$ANTIFRAUD_SERVER_PORT
-      - KAFKA_HOST=$KAFKA_SERVER_HOST
-      - KAFKA_PORT=$KAFKA_SERVER_NETWORK_PORT
+      - PORT_ANTIFRAUD_MICROSERVICE=$PORT_ANTIFRAUD_MICROSERVICE
+      - KAFKA_URL=kafka:9092
     depends_on:
       - mysqldb
       - kafka
@@ -51,22 +52,29 @@ services:
     image: confluentinc/cp-zookeeper:5.5.3
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - yape_challenge
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.3
     depends_on: [zookeeper]
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9991
+      KAFKA_CREATE_TOPICS: ${KAFKA_TOPIC}:1:1,${KAFKA_TOPIC_REPLY}:1:1
     ports:
       - 9092:9092
+      - 29092:29092
+    networks:
+      - yape_challenge
 
-  volumes:
-    databaseyapechallenge:
+volumes:
+  databaseyapechallenge:
 
-  networks:
-    yape_challenge:
-      driver: bridge
+networks:
+  yape_challenge:
+    driver: bridge

@@ -4,3 +4,5 @@ export const HTTP_STATUS = {
   NOT_FOUND: 404,
   SUCCESS: 200
 }
+
+export const BROKER_KAFKA_URL = process.env.KAFKA_URL || 'localhost:9092';
