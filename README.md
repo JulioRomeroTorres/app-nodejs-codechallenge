@@ -75,8 +75,46 @@ You can use any approach to store transaction data but you should consider that 
 
 You can use Graphql;
 
-# Send us your challenge
+# How to resolve the problem
 
-When you finish your challenge, after forking a repository, you **must** open a pull request to our repository. There are no limitations to the implementation, you can follow the programming paradigm, modularization, and style that you feel is the most appropriate solution.
+To solve the problem, consider the following technological stack:
+  - Database: MySql
+  - Nodejs Framework: Nestjs
+  -ORM: No
+  -Kafka
 
-If you have any questions, please let us know.
+2 endpoints were defined, which will be responsible for starting the transaction validation process as well as another endpoint that allows knowing the current status of the transaction, as shown below:
+
+![OpenApiEndpoint](source/Apicatalog.png)
+
+The process that was followed was the following:
+
+- Validation process
+  The validation process follows the following flow:
+
+  ![ValidateProcess](source/ValidateTransactionProcess.png)
+
+  1. The transaction validation process begins with the query to the endpoint **/transaction/create**, which returns a unique identifier (uuid) as shown below:
+
+  ![ResponseCreateTransaction](source/CreateTransaction.png)
+
+  2. At that time the record will be created in the transaction database.
+
+  3. It is publish to the topic **yape_challenge**
+
+  4. El microservicio Antifraud está activamente escuchando en es tópico, por lo que valida la transacción.
+
+  5. The validation result is published in the topic **yape_challenge_reply**.
+
+  6. Such a topic is continually heard by the transaction service.
+
+  7. Finally the status of the transaction is updated.
+
+- Get transaction status 
+
+  Once the process is completed, the endpoint **/transaction/:idProcess** is consulted with the identifier obtained in the first step to know the status of the transaction, obtaining the following response:
+
+  ![ResponseCreateTransaction](source/GetTransaction.png)
+
+In order to test the services, the Insomnia collection is attached, called **InsomniaCollection** in the **source** folder.
+
