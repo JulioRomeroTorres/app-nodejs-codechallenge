@@ -3,15 +3,17 @@ import { TransactionService } from "@src/application/service/TransactionService"
 import { ValidatorService } from "@src/application/service/ValidatorService";
 import { ClientKafka, Transport, Client, ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { CustomException } from "@src/application/exception/Exception";
-import { RequestTransactionPayload } from "@src/application/interface/dto/RequestTransactionPayload";
-import { ResponseTransactionPayload } from "@src/application/interface/dto/ResponseTransactionPayload";
+import { RequestTransactionPayload, RequestTransactionPayloadDto } from "@src/application/interface/dto/RequestTransactionPayload";
+import { ResponseTransactionPayload, ResponseTransactionPayloadDto } from "@src/application/interface/dto/ResponseTransactionPayload";
 import { KAFKA_TOPIC_REPLY, STATUS_TRANSACTION } from "@src/domain/constants/AppConstants";
 import { TransactionSchema } from "@src/application/validation/TransactionSchema";
 import { createResponseTransaction } from "@src/application/utils/Utils";
 import { RequestAntiFraudPayload } from "@src/application/interface/dto/RequestAntiFraudPayload";
 import { ResponseAntiFraudPayload } from "@src/application/interface/dto/ResponseAntiFraudPayload";
+import { ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
 const { v4: uuidv4 } = require('uuid');
 
+@ApiTags("transaction")
 @Controller("transaction")
 export class TransactionController {
   private topic: string;
@@ -30,6 +32,8 @@ export class TransactionController {
   }
   
   @Post('/create')
+  @ApiBody({ type:  RequestTransactionPayloadDto})
+  @ApiResponse({ status: 201, type: ResponseTransactionPayloadDto })
   async createTransaction(@Body() requestCreateTransaction: RequestTransactionPayload): Promise<ResponseTransactionPayload> {
     try{
       this.validatorService.validate(TransactionSchema, requestCreateTransaction);
