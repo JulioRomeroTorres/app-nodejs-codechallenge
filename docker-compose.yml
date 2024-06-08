@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   mysqldb:
-    image: mysql:5.7
+    build: ./dbService
     restart: unless-stopped
     env_file: ./.env
     environment:
@@ -11,7 +11,6 @@ services:
       - $MYSQLDB_EXPOSE_PORT:$MYSQLDB_DOCKER_PORT
     volumes:
       - databaseyapechallenge:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - yape_challenge
       
